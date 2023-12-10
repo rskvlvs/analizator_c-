@@ -1,0 +1,29 @@
+for(;;)a++;
+for(;);
+{
+{
+float a=9;
+int d= ;
+float int;
+int b = 10;
+int float;
+while()a = 15;
+while()
+a = 5;
+while(a);
+if()
+int _a;
+double _a;
+int a = 9;;
+double 89b;
+string __a;
+for(;;){a--;
+a = 2;
+}
+while(a)a++;
+}
+a%3;
+a % 15;
+
+
+
