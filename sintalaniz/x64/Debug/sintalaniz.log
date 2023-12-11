@@ -1,3 +1,5 @@
 ﻿  analiz.cpp
-C:\Projects C++\sintalaniz\sintalaniz\analiz.cpp(139,7): warning C4101: t: неиспользованная локальная переменная
+C:\Projects C++\sintalaniz\sintalaniz\analiz.cpp(145,7): warning C4101: t: неиспользованная локальная переменная
+C:\Projects C++\sintalaniz\sintalaniz\analiz.cpp(277,64): warning C4101: fl: неиспользованная локальная переменная
+C:\Projects C++\sintalaniz\sintalaniz\analiz.cpp(284,28): warning C4101: new_it: неиспользованная локальная переменная
   sintalaniz.vcxproj -> C:\Projects C++\sintalaniz\x64\Debug\sintalaniz.exe

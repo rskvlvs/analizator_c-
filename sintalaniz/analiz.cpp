@@ -34,6 +34,7 @@ analiz::analiz() {
 	brackets();
 	naming(); 
 	semicolon_check();
+	break_continue_position();
 }
 
 void analiz::brackets() {
@@ -45,16 +46,19 @@ void analiz::brackets() {
 	vector<len_s> temp; 
 	int count_of_op_brackets = 0, count_of_cl_brackets = 0;
 	char sym;
+	int sup_flag;
 	while (i < len) {
 		lens sz = size(text[i]);
 		j = 0;
 		while (j < sz) {
 			sym = text[i][j];
 			if (sym == '{') {
+				sup_flag = 1;
 				count_of_op_brackets += 1;
 				temp.push_back(i);
 			}
 			if (sym == '}') {
+				sup_flag = 2;
 				count_of_cl_brackets += 1;
 				if (count_of_cl_brackets > count_of_op_brackets)
 					cout << "Лишняя закрывающая фигурная скобка в строке " << i + 1 << endl;
@@ -62,6 +66,10 @@ void analiz::brackets() {
 			j++;
 		}
 		i++;
+	}
+	if (sup_flag == 1) {
+		cout << "Нужна закрывающая фигурная скобка в строке " << temp[size(temp) - 1] << endl;
+		count_of_cl_brackets += 1;
 	}
 	if (count_of_op_brackets > count_of_cl_brackets) {
 		i = count_of_op_brackets - count_of_cl_brackets; 
@@ -92,7 +100,7 @@ void analiz::naming() {
 		sz = size(text[i]);
 		j = 0;
 		while (j <= sz) {
-			if (text[i][j] != ' ' && text[i][j] != '\0') {
+			if (text[i][j] != ' ' && text[i][j] != '\0' && text[i][j] != '\t') {
 				w += text[i][j];
 			}
 			else {
@@ -108,7 +116,6 @@ void analiz::naming() {
 							temp2.erase(size(temp2) - 1);
 							if (size(temp2) >= 1) {
 								wor.push_back(temp2);
-								if (temp2 == "break")break_position();
 								temp2.clear();
 							}
 							wor.push_back(deleted);
@@ -117,7 +124,6 @@ void analiz::naming() {
 					}
 					if (size(temp2) >= 1){
 						wor.push_back(temp2);
-						if (temp2 == "break")break_position();
 						temp2.clear();
 					}
 				}
@@ -266,38 +272,76 @@ void analiz::naming() {
 }
 
 void analiz::semicolon_check() {
-	vector<vector<string>>::size_type i = 0;
-	vector<string>::size_type j, position;
-	int count_of_semi, flag, count_of_op_plus, count_of_op_minus;
+	vector<vector<string>>::size_type i = 0, checked1 = 0, checked2 = 0;
+	vector<string>::size_type j, position, it;
+	int count_of_semi, flag, count_of_op_plus, count_of_op_minus, fl;
 	string::size_type iterator;
 	string::size_type exep, sup;
 	int super_flag = 0;
 	vector<string>::size_type sup_iter;
 	string super_try; 
 	super_try.clear();
+	vector<string>::size_type new_it;
+	//Провести изменения сайзов на константные значения
 	while (i < size(words)) {
 		flag = 0;
 		count_of_semi = 0;
 		for (j = 0; j < size(words[i]); j++) {
-			for (exep = 0; exep < size(words[i][j]); exep++) {
-				if (words[i][j][exep] == '%') {
-					super_flag = 0;
-					if (exep == 0 && j >= 1) {
-						for (sup_iter = 0; sup_iter < size(int_variables); sup_iter++)
-							if (words[i][j - 1] == int_variables[sup_iter])super_flag = 1;
-					}
-					else if (exep >= 1) {
-						sup = 0;
-						while (sup < exep) { 
-							super_try += words[i][j][sup];
-							sup++;
+			if (size(words[i]) == 0)
+				break;
+			if (i == checked1) {
+				for (exep = 0; exep < size(words[i][j]); exep++) {
+					if (words[i][j][exep] == '%') {
+						super_flag = 0;
+						if (exep == 0 && j >= 1) {
+							it = 0;
+							while (it < size(words[i][j - 1])) {
+								if (!isdigit(words[i][j - 1][it])) {
+									super_flag = 0;
+									break;
+								}
+								else super_flag = 1;
+								it++;
+							}
+							if (super_flag == 0) {
+								for (sup_iter = 0; sup_iter < size(int_variables); sup_iter++) {
+									if (words[i][j - 1] == int_variables[sup_iter]) {
+										super_flag = 1;
+										break;
+									}
+									else super_flag = 0;
+								}
+							}
 						}
-						for (sup_iter = 0; sup_iter < size(int_variables); sup_iter++)
-							if (super_try == int_variables[sup_iter])super_flag = 1;
-						super_try.clear();
+						else if (exep >= 1) {
+							sup = 0;
+							while (sup < exep) {
+								super_try += words[i][j][sup];
+								sup++;
+							}
+							it = 0;
+							while (it < size(super_try)) {
+								if (!isdigit(super_try[it])) {
+									super_flag = 0;
+									break;
+								}
+								else super_flag = 1;
+								it++;
+							}
+							if (super_flag == 0) {
+								for (sup_iter = 0; sup_iter < size(int_variables); sup_iter++)
+									if (super_try == int_variables[sup_iter]) {
+										super_flag = 1;
+										break;
+									}
+									else super_flag = 0;
+							}
+							super_try.clear();
+						}
+						if (super_flag == 0)cout << "Попытка проведения операции '%' с переменными типа не 'int' в строке " << i + 1 << endl;
 					}
-					if (super_flag == 0)cout << "Попытка проведения операции '%' с переменными типа не 'int' в строке " << i + 1 << endl;
 				}
+				checked1 += 1;
 			}
 			if (words[i][j] == "for") {
 				for (position = 0; position < size(words[i]); position++) {
@@ -335,6 +379,7 @@ void analiz::semicolon_check() {
 				}
 				if (count_of_semi > 3)
 					cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
+				j = position;
 			}
 			else if (words[i][j] == "while") {
 				count_of_semi = 0;
@@ -369,6 +414,7 @@ void analiz::semicolon_check() {
 						}
 					}
 				}
+				j = position;
 			}
 			else if (words[i][j] == "if") {
 				count_of_semi = 0;
@@ -403,57 +449,75 @@ void analiz::semicolon_check() {
 						}
 					}
 				}
+				j = position;
 			}
 			else {
-				count_of_semi = 0;
-				if (words[i][j] == ";") count_of_semi++;
-				if (size(words[i]) > 2) {
-
-				}
-				else if (size(words[i]) == 2) {
-					count_of_op_plus = 0;
-					count_of_op_minus = 0;
-					for (iterator = 0; iterator < size(words[i][j]); iterator++) {
-						if (words[i][j][iterator] == '+')
-							count_of_op_plus++;
-						else if (words[i][j][iterator] == '-')
-							count_of_op_minus++;
+				if (i == checked2) {
+					count_of_semi = 0;
+					for (iterator = 0; iterator < size(words[i]); iterator++) {
+						if (words[i][iterator] == ";")count_of_semi++;
+						if ((words[i][iterator] == "{" || words[i][iterator] == "}") && count_of_semi >= 1)
+							cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
 					}
-					if (count_of_op_plus == 0 && count_of_op_minus != 2)
-						cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
-					if (count_of_op_minus == 0 && count_of_op_plus != 2)
-						cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
+				/*	if (size(words[i]) > 2) {
+						for (iterator = 0; iterator < size(words[i]); iterator++) {
+							if (words[i][iterator] == ";")count_of_semi++;
+						}
+						if (words[i][size(words[i]) - 1] == "{") {
+							if (count_of_semi != 0) cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
+						}
+						else
+							if (count_of_semi != 1) cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
+					}
+					else if (size(words[i]) == 2) {
+						count_of_semi = 0;
+						fl = 0;
+						for (iterator = 0; iterator < size(words[i][j]); iterator++) {
+							if ((words[i][j][iterator] == '{' || words[i][j][iterator] == '}') && count_of_semi >= 1) {
+								cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
+								fl = 1;
+							}
+							else if (words[i][j][iterator] == ';')count_of_semi++;
+						}
+						if(count_of_semi != 1 && fl == 0)
+							cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
+					}*/
+					checked2 += 1;
 				}
 			}
 		}
 		i++;
+		checked1 = i; 
+		checked2 = i;
 	}
 }
 
-void analiz::break_position() {
-	vector<vector<string>>::size_type len_w = 0; 
+void analiz::break_continue_position() {
+	vector<vector<string>>::size_type i, position = 0;
 	vector<string>::size_type j;
 	int flag1 = 0, flagop = 0;
-	for (len_w = 0; len_w < size(words); len_w++) {
-		for (j = 0; j < size(words[len_w]); j++) {
-			if (words[len_w][j] == "for" || words[len_w][j] == "while")
+	for (i = 0; i < size(words); i++) {
+		for (j = 0; j < size(words[i]); j++) {
+			if (words[i][j] == "for" || words[i][j] == "while") {
 				flag1 = 1;
-			if (words[len_w][j] == "{" && flag1 == 1) {
-				flagop = 1; 
+				position = i;
 			}
-			if (words[len_w][j] == "}" && flag1 == 1) {
+			else if (words[i][j] == "{" && flag1 == 1) {
+				flagop = 1;
+			}
+			else if (words[i][j] == "}" && flag1 == 1) {
 				if (flagop == 1) {
-					flagop = 0; 
+					flagop = 0;
 					flag1 = 0;
 				}
 			}
-			/*if (words[len_w][j])
-			if (words[len_w][j] == "break") {
-				if (flag1 == 0) {
-					cout << "Неправильное расположение break в строке " << len_w + 1 << endl; 
-				}
-				else if()
-			}*/
+			else if (words[i][j] == "break")
+				if (flagop == 0 && i - position != 1)
+					cout << "Неправильное использование оператора 'break' в строке " << i + 1 << endl;
+				else;
+			else if (words[i][j] == "continue")
+				if (flagop == 0 && i - position != 1)
+					cout << "Неправильное использование оператора 'continue' в строке " << i + 1 << endl;
 		}
 	}
 }

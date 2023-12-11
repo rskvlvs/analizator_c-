@@ -1,20 +1,13 @@
 #pragma once
 #include <vector> 
 #include <iostream> 
-#include <stdlib.h> 
 #include <string> 
 #include <vector> 
-#include <exception>
-#include <list> 
-#include <locale>
-#include <stdio.h>
-#include <fstream> 
+//#include <stdio.h>
 
 
 using std::string;
 using std::vector;
-using std::list;
-using std::ifstream;
 
 class analiz{
 public:
@@ -22,7 +15,7 @@ public:
 	void brackets();
 	void naming();
 	void semicolon_check();
-	void break_position(); 
+	void break_continue_position(); 
 private:
 	int lines = 0;
 	vector<string> text; 
