@@ -1,7 +1,4 @@
 void main(){
-	for(;;)a++;
-	{}
-	continue;
 	for(;;)
 	break;
 	float a=9;
@@ -12,6 +9,9 @@ void main(){
 	while(a)a = 15;
 	while()
 	a = 5;
+	for(;;){--a;
+	}
+	continue;
 	while(a)a++;
 	if()
 	int _a;
@@ -19,10 +19,12 @@ void main(){
 	int a = 9;;
 	double 89b;
 	string __a;
-	for(;;){a--;
+	for(;;){a++;
 	a = 2;
 	}
-	while(a)a++;
+	a;
+	a+;
+	while(a)++a;
 	}
 	a%3;
 	5 % 15;

@@ -19,6 +19,57 @@ using std::list;
 using std::getline;
 using std::ifstream;
 
+bool analiz::isOperation(const string& str, int len) {
+	int flag, i, checkpoint = - 1;
+	string w, st;
+	w.clear();
+	st.clear();
+	for (i = 0; i < len; i++) {
+		if (isalpha(str[i]) || str[i] == '_')
+			w += str[i];
+		else {
+			checkpoint = i;
+			break; }
+	}
+	flag = 0;
+	if (checkpoint == -1 && (w == "break"  || w == "continue"))
+		return true;
+	if (checkpoint == 0 && len >= 3) {
+		if ((str[0] == '+' && str[1] == '+') || (str[0] == '-' && str[1] == '-')) {
+			for (i = 2; i < len; i++)
+				if (isalpha(str[i]) || str[i] == '_')
+					st += str[i];
+			for (i = 0; i < size(variables); i++)
+				if (st == variables[i])
+					return true;
+			return false;
+		}
+	}
+	if (checkpoint == -1 && w != "break" && w != "continue")
+		return false;
+	for (i = 0; i < size(variables); i++)
+		if (w == variables[i])flag = 1;
+	if (flag == 1 && (checkpoint == len - 2 || checkpoint == 0) && str[checkpoint] == '+' && str[checkpoint + 1] == '+')
+		return true;
+	else if (flag == 1 && (checkpoint == len - 2 || checkpoint == 0) && str[checkpoint] == '-' && str[checkpoint + 1] == '-')
+		return true;
+	else if ((checkpoint < len - 2) && str[checkpoint] == '+' && str[checkpoint + 1] == '=')
+		return true;
+	else if (flag == 1 && (checkpoint < len - 1) && str[checkpoint] == '%')
+		return true;
+	else if ((checkpoint < len - 2) && str[checkpoint] == '-' && str[checkpoint + 1] == '=')
+		return true;
+	else if ((checkpoint < len - 2) && str[checkpoint] == '*' && str[checkpoint + 1] == '=')
+		return true;
+	else if ((checkpoint < len - 2) && str[checkpoint] == '/' && str[checkpoint + 1] == '=')
+		return true;
+	else if (flag == 1 && str[checkpoint] == '=' && checkpoint < len - 1 && str[checkpoint + 1] != '=')
+		return true;
+	else
+		return false;
+}
+
+
 analiz::analiz() {
 	ifstream f("test.txt");
 	string stroka;
@@ -358,17 +409,7 @@ void analiz::semicolon_check() {
 								else if (words[i][position - 1] == "}" && words[i][position - 2] == "{")
 									cout << "Ошибка в описании 'for' в строке " << i + 1 << endl;
 								else if (words[i][position - 2] == ")" || (words[i][position - 3] == ")" && words[i][position - 2] == "{")) {
-									count_of_op_plus = 0;
-									count_of_op_minus = 0;
-									for (iterator = 0; iterator < size(words[i][position - 1]); iterator++) {
-										if (words[i][position - 1][iterator] == '+')
-											count_of_op_plus++;
-										else if (words[i][position - 1][iterator] == '-')
-											count_of_op_minus++;
-									}
-									if (count_of_op_plus == 0 && count_of_op_minus != 2)
-										cout << "Ошибка в описании 'for' в строке " << i + 1 << endl;
-									if (count_of_op_minus == 0 && count_of_op_plus != 2)
+									if (!isOperation(words[i][position - 1], size(words[i][position - 1])))
 										cout << "Ошибка в описании 'for' в строке " << i + 1 << endl;
 								}
 							}
@@ -398,17 +439,7 @@ void analiz::semicolon_check() {
 							else if (words[i][position - 1] == "}" && words[i][position - 2] == "{")
 								cout << "Ошибка в описании 'while' в строке " << i + 1 << endl;
 							else if (words[i][position - 2] == ")") {
-								count_of_op_plus = 0;
-								count_of_op_minus = 0;
-								for (iterator = 0; iterator < size(words[i][position - 1]); iterator++) {
-									if (words[i][position - 1][iterator] == '+')
-										count_of_op_plus++;
-									else if (words[i][position - 1][iterator] == '-')
-										count_of_op_minus++;
-								}
-								if (count_of_op_plus == 0 && count_of_op_minus != 2)
-									cout << "Ошибка в описании 'while' в строке " << i + 1 << endl;
-								if (count_of_op_minus == 0 && count_of_op_plus != 2)
+								if (!isOperation(words[i][position - 1], size(words[i][position - 1])))
 									cout << "Ошибка в описании 'while' в строке " << i + 1 << endl;
 							}
 						}
@@ -454,34 +485,23 @@ void analiz::semicolon_check() {
 			else {
 				if (i == checked2) {
 					count_of_semi = 0;
-					for (iterator = 0; iterator < size(words[i]); iterator++) {
-						if (words[i][iterator] == ";")count_of_semi++;
-						if ((words[i][iterator] == "{" || words[i][iterator] == "}") && count_of_semi >= 1)
-							cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
-					}
-				/*	if (size(words[i]) > 2) {
+					bool isOp;
+					if (size(words) > 2) {
 						for (iterator = 0; iterator < size(words[i]); iterator++) {
 							if (words[i][iterator] == ";")count_of_semi++;
-						}
-						if (words[i][size(words[i]) - 1] == "{") {
-							if (count_of_semi != 0) cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
-						}
-						else
-							if (count_of_semi != 1) cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
-					}
-					else if (size(words[i]) == 2) {
-						count_of_semi = 0;
-						fl = 0;
-						for (iterator = 0; iterator < size(words[i][j]); iterator++) {
-							if ((words[i][j][iterator] == '{' || words[i][j][iterator] == '}') && count_of_semi >= 1) {
+							if((words[i][iterator] == "{" || words[i][iterator] == "}") && count_of_semi != 0)
 								cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
-								fl = 1;
-							}
-							else if (words[i][j][iterator] == ';')count_of_semi++;
 						}
-						if(count_of_semi != 1 && fl == 0)
+					}
+					if (size(words[i]) == 2) {
+						if ((words[i][0] == "{" || words[i][0] == "}") && count_of_semi >= 1)
 							cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
-					}*/
+						else {
+							isOp = isOperation(words[i][0], size(words[i][0]));
+							if(!isOp)cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
+							else if(words[i][1] != ";")cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
+						}
+					}
 					checked2 += 1;
 				}
 			}
@@ -512,11 +532,11 @@ void analiz::break_continue_position() {
 				}
 			}
 			else if (words[i][j] == "break")
-				if (flagop == 0 && i - position != 1)
+				if (flagop == 0 && ((i - position != 1) && ( i - position != 0)))
 					cout << "Неправильное использование оператора 'break' в строке " << i + 1 << endl;
 				else;
 			else if (words[i][j] == "continue")
-				if (flagop == 0 && i - position != 1)
+				if (flagop == 0 && ((i - position != 1) && (i - position != 0)))
 					cout << "Неправильное использование оператора 'continue' в строке " << i + 1 << endl;
 		}
 	}
