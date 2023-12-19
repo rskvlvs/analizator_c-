@@ -5,8 +5,7 @@ void main(){
 	int d= ;
 	float int;
 	int b = 10;
-	int float;
-	while(a)a = 15;
+	while(a)a += 15;
 	while()
 	a = 5;
 	for(;;){--a;
@@ -22,6 +21,7 @@ void main(){
 	for(;;){a++;
 	a = 2;
 	}
+	a++;;
 	a;
 	a+;
 	while(a)++a;

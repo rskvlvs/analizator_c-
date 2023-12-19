@@ -73,6 +73,7 @@ bool analiz::isOperation(const string& str, int len) {
 analiz::analiz() {
 	ifstream f("test.txt");
 	string stroka;
+	string delenie(74, '-');
 	while (getline(f, stroka)) {
 		text.push_back(stroka);
 		lines++;
@@ -82,10 +83,20 @@ analiz::analiz() {
 		cout << "Программа не введена";
 		exit(1);
 	}
+	cout << delenie << endl;
+	cout << "--> Ошибки в расстановке фигурных скобок: \n";
 	brackets();
-	naming(); 
+	cout << delenie << endl;
+	cout << "-->Ошибки в инициализации переменных: \n";
+	naming();
+	cout << delenie << endl;
+	cout << "-->Ошибки в использовании точки с запятой, описании цикла 'while', 'for', \n";
+	cout << "-->использовании операции '%' и конструкции if: \n";
 	semicolon_check();
+	cout << delenie << endl;
+	cout << "-->Ошибки в использовании операторов break и continue: \n";
 	break_continue_position();
+	cout << delenie << endl;
 }
 
 void analiz::brackets() {
@@ -490,6 +501,8 @@ void analiz::semicolon_check() {
 						for (iterator = 0; iterator < size(words[i]); iterator++) {
 							if (words[i][iterator] == ";")count_of_semi++;
 							if((words[i][iterator] == "{" || words[i][iterator] == "}") && count_of_semi != 0)
+								cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
+							if(count_of_semi > 1)
 								cout << "Ошибка в написании ';' в строке " << i + 1 << endl;
 						}
 					}

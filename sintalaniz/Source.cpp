@@ -1,4 +1,4 @@
-#include <iostream>
+
 #include <locale.h>
 #include "analiz.h"
 
